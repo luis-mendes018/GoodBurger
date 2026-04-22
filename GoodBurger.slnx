@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/Itens de Solução/">
+    <File Path="docker-compose.yml" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="GoodBurger.API/GoodBurger.API.csproj" />
+    <Project Path="GoodBurger.Client/GoodBurger.Client.csproj" Id="1f82d90b-aacf-4103-85e2-89ae39464d77" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="GoodBurger.Tests/GoodBurger.Tests.csproj" Id="bc9a5dd5-e514-450f-a089-d506e19ba172" />
+  </Folder>
+</Solution>

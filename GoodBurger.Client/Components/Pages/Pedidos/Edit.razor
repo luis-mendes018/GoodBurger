@@ -1,0 +1,153 @@
+﻿@page "/pedidos/edit/{id:guid}"
+
+@inject HttpClient Http
+@inject NavigationManager Nav
+
+<div class="container mt-4">
+
+    <h3 class="fw-bold mb-4">Editar Pedido</h3>
+
+    @if (vm.Products.Count == 0)
+    {
+        <div class="text-center mt-4">
+            <div class="spinner-border"></div>
+        </div>
+    }
+    else
+    {
+        <!-- SANDUÍCHES -->
+        <div class="card mb-3 shadow-sm">
+            <div class="card-header fw-bold">Sanduíches</div>
+            <div class="card-body">
+
+                @foreach (var p in vm.Products.Where(p => p.Type == "Sandwich"))
+                {
+                    <div class="form-check">
+                        <input type="checkbox"
+                               class="form-check-input"
+                               @bind="p.IsSelected" />
+
+                        <label class="form-check-label">
+                            @p.Name (R$ @p.Price)
+                        </label>
+                    </div>
+                }
+
+            </div>
+        </div>
+
+        <!-- ACOMPANHAMENTOS -->
+        <div class="card mb-3 shadow-sm">
+            <div class="card-header fw-bold">Acompanhamentos</div>
+            <div class="card-body">
+
+                @foreach (var p in vm.Products.Where(p => p.Type == "Side"))
+                {
+                    <div class="form-check">
+                        <input type="checkbox"
+                               class="form-check-input"
+                               @bind="p.IsSelected" />
+
+                        <label class="form-check-label">
+                            @p.Name (R$ @p.Price)
+                        </label>
+                    </div>
+                }
+
+            </div>
+        </div>
+
+        <!-- BOTÕES -->
+        <div class="d-flex gap-2">
+            <button class="btn btn-primary"
+                    @onclick="UpdateOrder">
+                Salvar alterações
+            </button>
+
+            <button class="btn btn-secondary"
+                    @onclick="Voltar">
+                Cancelar
+            </button>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(error))
+    {
+        <div class="alert alert-danger mt-3">
+            @error
+        </div>
+    }
+
+</div>
+
+@code {
+    [Parameter] public Guid id { get; set; }
+
+    private UpdateOrderViewModel vm = new();
+    private string? error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        vm.Id = id;
+
+        var menu = await Http.GetFromJsonAsync<MenuViewModel>("v1/menu");
+
+        
+        var order = await Http.GetFromJsonAsync<OrderDetailViewModel>($"v1/orders/{id}");
+
+        if (menu is null || order is null) return;
+
+       
+        vm.Products = [
+            ..menu.Sandwiches.Select(p => new ProductOption
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Price = p.Price,
+                Type = "Sandwich",
+                IsSelected = order.Items.Any(i => i.ProductName == p.Name)
+            }),
+            ..menu.Sides.Select(p => new ProductOption
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Price = p.Price,
+                Type = "Side",
+                IsSelected = order.Items.Any(i => i.ProductName == p.Name)
+            })
+        ];
+    }
+
+    private async Task UpdateOrder()
+    {
+        vm.SelectedProductIds = vm.Products
+            .Where(p => p.IsSelected)
+            .Select(p => p.Id)
+            .ToList();
+
+        var response = await Http.PutAsJsonAsync($"v1/orders/update/{vm.Id}", new
+        {
+            productIds = vm.SelectedProductIds
+        });
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var err = await response.Content.ReadFromJsonAsync<ApiError>();
+            error = err?.Message ?? "Erro ao atualizar pedido";
+            return;
+        }
+
+        Nav.NavigateTo("/pedidos");
+    }
+
+    private void Voltar()
+    {
+        Nav.NavigateTo("/pedidos");
+    }
+
+    public class ApiError
+    {
+        public string Error { get; set; } = string.Empty;
+        public string Message { get; set; } = string.Empty;
+    }
+}

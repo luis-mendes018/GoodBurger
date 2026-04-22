@@ -1,0 +1,6 @@
+@GoogBurger.API_HostAddress = http://localhost:5101
+
+GET {{GoogBurger.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

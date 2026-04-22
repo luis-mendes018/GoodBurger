@@ -1,0 +1,35 @@
+services:
+  db:
+    image: postgres:17
+    container_name: goodhamburger_db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: postgre123
+      POSTGRES_DB: goodhamburger_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - hamburger-network
+
+    #Interface de administração do postgre
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: goodhamburger_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+    networks:
+      - hamburger-network
+
+networks:
+  hamburger-network:
+    driver: bridge
+
+volumes:
+  pgdata:
