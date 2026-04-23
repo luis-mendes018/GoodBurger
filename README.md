@@ -57,7 +57,7 @@ Isso seria um caso clássico de <strong>overengineering</strong>, já que eu est
 
 <p>
 
-  Para executar o projeto, é necessário que você tenha os seguintes recusros instalados na sua
+  Para executar o projeto, é necessário que você tenha os seguintes recursos instalados na sua
   máquina:
 
   <ul>
